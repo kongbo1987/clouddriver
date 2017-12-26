@@ -1,3 +1,8 @@
+jar {
+  baseName = 'clouddriver-kubernetes'
+  version = '1.741.0'
+}
+
 dependencies {
   spinnaker.group('kubernetes')
   compile project(":clouddriver-artifacts")

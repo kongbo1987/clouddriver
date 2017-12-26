@@ -491,6 +491,12 @@ class KubernetesApiAdaptor {
       client.extensions().deployments().inNamespace(namespace).create(deployment)
     }
   }
+  
+  Deployment createOrReplaceDeployment(String namespace, Deployment deployment) {
+    exceptionWrapper("deployments.createOrReplace", "Create Deployment $deployment.metadata.name", namespace) {
+      client.extensions().deployments().inNamespace(namespace).createOrReplace(deployment)
+    }
+  }
 
   DoneableDeployment editDeployment(String namespace, String name) {
     exceptionWrapper("deployments.edit", "Edit deployment $name", namespace) {
