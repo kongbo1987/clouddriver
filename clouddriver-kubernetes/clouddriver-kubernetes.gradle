@@ -1,7 +1,10 @@
 jar {
   baseName = 'clouddriver-kubernetes'
-  version = '1.741.0'
+  version = '1.743.0'
 }
+
+apply plugin: 'maven'
+apply plugin: 'java'
 
 dependencies {
   spinnaker.group('kubernetes')

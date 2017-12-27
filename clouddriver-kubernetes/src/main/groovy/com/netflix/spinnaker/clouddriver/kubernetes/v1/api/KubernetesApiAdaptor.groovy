@@ -26,6 +26,7 @@ import io.fabric8.kubernetes.api.model.extensions.*
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientException
+import io.fabric8.kubernetes.client.Watcher
 
 import java.util.concurrent.TimeUnit
 
@@ -142,6 +143,13 @@ class KubernetesApiAdaptor {
     }
   }
 
+  List<Event> getEvents(String namespace, HasMetadata object, String type) {
+    exceptionWrapper("events.list", "Get Events", namespace) {
+      client.events().inNamespace(namespace).withField("involvedObject.type", type)
+        .withField("involvedObject.name", object.metadata.name).list().items
+    }
+  }
+
   Ingress createIngress(String namespace, Ingress ingress) {
     exceptionWrapper("ingresses.create", "Create Ingress ${ingress?.metadata?.name}", namespace) {
       client.extensions().ingresses().inNamespace(namespace).create(ingress)
@@ -247,6 +255,12 @@ class KubernetesApiAdaptor {
   String getLog(String namespace, String name, String containerId) {
     exceptionWrapper("pod.logs", "Get Logs $name", namespace) {
       client.pods().inNamespace(namespace).withName(name).inContainer(containerId).getLog()
+    }
+  }
+
+  String getLog(String namespace, String name) {
+    exceptionWrapper("pod.logs", "Get Logs $name", namespace) {
+      client.pods().inNamespace(namespace).withName(name).getLog()
     }
   }
 
@@ -491,7 +505,7 @@ class KubernetesApiAdaptor {
       client.extensions().deployments().inNamespace(namespace).create(deployment)
     }
   }
-  
+
   Deployment createOrReplaceDeployment(String namespace, Deployment deployment) {
     exceptionWrapper("deployments.createOrReplace", "Create Deployment $deployment.metadata.name", namespace) {
       client.extensions().deployments().inNamespace(namespace).createOrReplace(deployment)
@@ -520,5 +534,17 @@ class KubernetesApiAdaptor {
 
   static String getDeploymentRevision(ReplicaSet replicaSet) {
     return replicaSet?.metadata?.annotations?.get("$DEPLOYMENT_ANNOTATION/revision".toString())
+  }
+
+  Deployment watchDeployment(String namespace, Watcher<Deployment> watcher) {
+    exceptionWrapper("Deployment.watch", "Watch Deployment", namespace) {
+      client.namespaces().watch(watcher)
+    }
+  }
+
+  Deployment watchEvent(String namespace, Watcher<Event> watcher) {
+    exceptionWrapper("Event.watch", "Watch Event", namespace) {
+      client.namespaces().watch(watcher)
+    }
   }
 }
