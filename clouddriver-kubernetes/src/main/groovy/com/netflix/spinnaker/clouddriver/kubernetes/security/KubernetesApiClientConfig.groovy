@@ -16,29 +16,28 @@
 
 package com.netflix.spinnaker.clouddriver.kubernetes.security
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.KubeConfig;
-import io.kubernetes.client.util.SSLUtils;
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
-import org.yaml.snakeyaml.Yaml
-import org.yaml.snakeyaml.constructor.SafeConstructor
 
 import java.nio.file.Files;
 
 @Slf4j
 public class KubernetesApiClientConfig extends Config {
-  String kubeconfigFile
+  String configKey
   String context
   String cluster
   String user
   String userAgent
   Boolean serviceAccount
 
-  public KubernetesApiClientConfig(String kubeconfigFile, String context, String cluster, String user, String userAgent, Boolean serviceAccount) {
-    this.kubeconfigFile = kubeconfigFile
+  public KubernetesApiClientConfig(String configKey, String context, String cluster, String user, String userAgent, Boolean serviceAccount) {
+    this.configKey = configKey
     this.context = context
     this.user = user
     this.userAgent = userAgent
@@ -85,36 +84,24 @@ public class KubernetesApiClientConfig extends Config {
     KubeConfig kubeconfig
 
     try {
-      if (StringUtils.isEmpty(kubeconfigFile)) {
-        kubeconfig = KubeConfig.loadDefaultKubeConfig()
-      } else {
-        kubeconfig = KubeConfig.loadKubeConfig(new FileReader(kubeconfigFile))
-      }
-    } catch (FileNotFoundException e) {
-      throw new RuntimeException("Unable to create credentials from kubeconfig file: " + e, e)
-    } catch (Exception e2) {
-      throw new RuntimeException("Missing required field(s) in kubenetes configuration file.")
+      kubeconfig = parseConfig(configKey)
+    } catch (IOException e) {
+      throw new IllegalStateException("Parse config" + configKey + "failed");
     }
 
-    InputStream is = new FileInputStream(kubeconfigFile)
-    Reader input = new InputStreamReader(is)
-    Yaml yaml = new Yaml(new SafeConstructor())
-    Object config = yaml.load(input)
-    Map<String, Object> configMap = (Map<String, Object>)config
-
     //TODO: Need to validate cluster and user when client library exposes these api.
-    if (StringUtils.isEmpty(context) && !configMap.get("current-context")) {
+    if (StringUtils.isEmpty(context) && !kubeconfig.currentContext) {
       throw new RuntimeException("Missing required field ${context} in kubeconfig file and clouddriver configuration.")
     }
 
     if (!StringUtils.isEmpty(context)) {
-      kubeconfig.setContext(context);
+      kubeconfig.setContext(context)
     }
 
-    ApiClient client = Config.fromConfig(kubeconfig);
+    ApiClient client = Config.fromConfig(kubeconfig)
 
     if (!StringUtils.isEmpty(userAgent)) {
-      client.setUserAgent(userAgent);
+      client.setUserAgent(userAgent)
     }
 
     is.close()
@@ -122,4 +109,10 @@ public class KubernetesApiClientConfig extends Config {
 
     return client
   }
+
+  private static KubeConfig parseConfig(String config) throws IOException {
+    ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
+    return mapper.readValue(config, KubeConfig.class)
+  }
+
 }
