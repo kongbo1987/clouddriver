@@ -104,15 +104,22 @@ public class KubernetesApiClientConfig extends Config {
       client.setUserAgent(userAgent)
     }
 
-    is.close()
-    input.close()
-
     return client
   }
 
   private static KubeConfig parseConfig(String config) throws IOException {
+
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
-    return mapper.readValue(config, KubeConfig.class)
+    Map<String, Object> configMap = mapper.readValue(config, Map.class)
+
+    String currentContext = (String) configMap.get("current-context")
+    ArrayList<Object> contexts = (ArrayList<Object>) configMap.get("contexts")
+    ArrayList<Object> clusters = (ArrayList<Object>) configMap.get("clusters")
+    ArrayList<Object> users = (ArrayList<Object>) configMap.get("users")
+
+    KubeConfig kubeConfig = new KubeConfig(contexts, clusters, users)
+    kubeConfig.setContext(currentContext)
+    return kubeConfig
   }
 
 }
