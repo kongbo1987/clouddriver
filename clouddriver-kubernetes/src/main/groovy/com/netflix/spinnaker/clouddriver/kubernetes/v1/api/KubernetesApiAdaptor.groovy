@@ -145,7 +145,7 @@ class KubernetesApiAdaptor {
 
   List<Event> getEvents(String namespace, HasMetadata object, String type) {
     exceptionWrapper("events.list", "Get Events", namespace) {
-      client.events().inNamespace(namespace).withField("involvedObject.type", type)
+      client.events().inNamespace(namespace).withField("involvedObject.kind", type)
         .withField("involvedObject.name", object.metadata.name).list().items
     }
   }
