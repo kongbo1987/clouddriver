@@ -536,15 +536,9 @@ class KubernetesApiAdaptor {
     return replicaSet?.metadata?.annotations?.get("$DEPLOYMENT_ANNOTATION/revision".toString())
   }
 
-  Deployment watchDeployment(String namespace, Watcher<Deployment> watcher) {
-    exceptionWrapper("Deployment.watch", "Watch Deployment", namespace) {
-      client.namespaces().watch(watcher)
-    }
-  }
-
   Deployment watchEvent(String namespace, Watcher<Event> watcher) {
     exceptionWrapper("Event.watch", "Watch Event", namespace) {
-      client.namespaces().watch(watcher)
+      client.events().inAnyNamespace().watch(watcher)
     }
   }
 }
