@@ -538,7 +538,7 @@ class KubernetesApiAdaptor {
 
   Deployment watchEvent(String namespace, Watcher<Event> watcher) {
     exceptionWrapper("Event.watch", "Watch Event", namespace) {
-      client.events().inAnyNamespace().watch(watcher)
+      client.events().inNamespace(namespace).watch(watcher)
     }
   }
 }
