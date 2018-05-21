@@ -405,6 +405,18 @@ class KubernetesApiAdaptor {
     }
   }
 
+  ConfigMap getConfigMap(String namespace, String name) {
+    exceptionWrapper("configMaps.get", "Get Config Map", namespace, name) {
+      client.configMaps().inNamespace(namespace).withName(name).get()
+    }
+  }
+
+  ConfigMap createConfigMap(String namespace, ConfigMap configMap) {
+    exceptionWrapper("configMaps.create", "Create Config Maps $configMap.metadata.name", namespace) {
+      client.configMaps().inNamespace(namespace).createOrReplace(configMap)
+    }
+  }
+
   Namespace getNamespace(String namespace) {
     exceptionWrapper("namespaces.get", "Get Namespace $namespace", null) {
       client.namespaces().withName(namespace).get()
