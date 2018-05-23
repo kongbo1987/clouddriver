@@ -406,7 +406,7 @@ class KubernetesApiAdaptor {
   }
 
   ConfigMap getConfigMap(String namespace, String name) {
-    exceptionWrapper("configMaps.get", "Get Config Map", namespace, name) {
+    exceptionWrapper("configMaps.get", "Get Config Map $name", namespace) {
       client.configMaps().inNamespace(namespace).withName(name).get()
     }
   }
@@ -414,6 +414,12 @@ class KubernetesApiAdaptor {
   ConfigMap createConfigMap(String namespace, ConfigMap configMap) {
     exceptionWrapper("configMaps.create", "Create Config Maps $configMap.metadata.name", namespace) {
       client.configMaps().inNamespace(namespace).createOrReplace(configMap)
+    }
+  }
+
+  boolean deleteConfigMap(String namespace, String name) {
+    exceptionWrapper("configMaps.delete", "Delete Config Maps  $name", namespace) {
+      client.configMaps().inNamespace(namespace).withName(name).delete()
     }
   }
 
