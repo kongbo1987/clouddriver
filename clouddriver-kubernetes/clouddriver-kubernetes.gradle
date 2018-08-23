@@ -1,6 +1,6 @@
 jar {
   baseName = 'clouddriver-kubernetes'
-  version = '1.756.0'
+  version = '1.757.0'
 }
 
 apply plugin: 'maven'

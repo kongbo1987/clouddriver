@@ -512,9 +512,9 @@ class KubernetesApiAdaptor {
     }
   }
 
-  Deployment resizeDeployment(String namespace, String name, int size) {
+  Deployment resizeDeployment(String namespace, String name, int size, boolean sync) {
     exceptionWrapper("deployments.scale", "Resize Deployment $name to $size", namespace) {
-      client.extensions().deployments().inNamespace(namespace).withName(name).scale(size)
+      client.extensions().deployments().inNamespace(namespace).withName(name).scale(size, sync)
     }
   }
 
