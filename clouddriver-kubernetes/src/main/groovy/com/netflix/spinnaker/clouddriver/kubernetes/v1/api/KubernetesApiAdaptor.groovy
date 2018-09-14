@@ -571,4 +571,8 @@ class KubernetesApiAdaptor {
       client.extensions().deployments().inNamespace(namespace).watch(watcher)
     }
   }
+
+  NodeList getNodeList() {
+      return client.nodes().list();
+  }
 }
