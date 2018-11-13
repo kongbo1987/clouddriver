@@ -240,6 +240,13 @@ class KubernetesApiAdaptor {
     }
   }
 
+  List<Pod> getNodePods(String nodeName) {
+    exceptionWrapper("pods.list", "Get Pods matching $nodeName","") {
+      client.pods().inAnyNamespace().withField("spec.nodeName", nodeName).list().items
+    }
+
+  }
+
   boolean deletePod(String namespace, String name) {
     exceptionWrapper("pods.delete", "Delete Pod $name", namespace) {
       client.pods().inNamespace(namespace).withName(name).delete()
@@ -574,5 +581,21 @@ class KubernetesApiAdaptor {
 
   NodeList getNodeList() {
       return client.nodes().list();
+  }
+
+  Node getNode(String nodeName) {
+    return client.nodes().withName(nodeName).get();
+  }
+
+  Node lableNode(Node node) {
+    return client.nodes().createOrReplace(node);
+  }
+
+  void deleteNode(String nodeName) {
+    client.nodes().withName(nodeName).delete();
+  }
+
+  NodeList getNodeListWithLabels(Map<String, String> labels) {
+    return client.nodes().withLabels(labels).list();
   }
 }
